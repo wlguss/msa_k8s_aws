@@ -1,20 +1,23 @@
-server:
-    port: 8888
-    
+# cloud ver. 
+
+# eureka server는 사용하지 않음 bc 클라우드 환경에서는 eureka의 역할을 aws의 pod가 대신함 
+eureka:
+  client:
+    enabled: false
+
 spring:
-  
   application:
     name: api-gateway
 
   cloud:
     gateway:
         # cores 처리
-        # 각 서비스 모듈은 웹브라우저와 직접 통신하지 않으므로 단일진입점인 gateway 담당
+        # 각 서비스 모듈은 웹브라우저와 직접 통신하지 않으므로 단일 진입점인 gateway 담당
         globalcors:
             cors-configurations:
                 '[/**]':
                     allowedOrigins:
-                        - 'http://localhost:3000'
+                        - 'http://localhost:3000' # react(frontend) s3Bucket의 end-point
                     allowedMethods: '*'
                     allowedHeaders: '*'
                     exposedHeaders: '*'
@@ -54,10 +57,4 @@ spring:
                 
 jwt:
   secret: jslim-super-secret-key-for-jwt-123456789
-  
 
-# eureka client user service -> eureka server
-eureka:
-    client:
-        serviceUrl:
-            defaultZone: http://localhost:8761/eureka/
