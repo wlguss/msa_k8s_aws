@@ -2,23 +2,23 @@ apiVersion: apps/v1
 kind: Deployment
 
 metadata:
-  name: kakfa-deployment
+  name: kafka-deployment
   namespace: lgcns
 
 spec:
   replicas: 1
   selector:   
     matchLabels:
-      app: kakfa
+      app: kafka
 
   template:
     metadata:
       labels:
-        app: kakfa
+        app: kafka
     spec:
       containers:
-        - name: kakfa-container
-          image: wurstmeister/kakfa     
+        - name: kafka-container
+          image: wurstmeister/kafka     
           ports:
             - containerPort: 9092
             - containerPort: 9093
