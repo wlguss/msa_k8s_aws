@@ -46,4 +46,17 @@ jobs:
           kubectl apply -f ./k8s/msa_zookeeper.yaml
           kubectl apply -f ./k8s/msa_kafka.yaml
 
-      # image build 후 ecr에 push 
+      # image build 후 ecr에 push (image: apigateway, user, product, order)
+      - name: apigateway image build and push docker image to ecr
+        env: 
+          REGISTRY: 933090817123.dkr.ecr.ap-south-1.amazonaws.com
+          REPOSITORY: apigateway
+          IMAGE_TAG: lagest
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f ./apigateway/Dockerfile .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+      - name: eks kubectl apigateway apply
+        run : |
+          kubectl apply ./apigateway/k8s/apigateway-depl.yaml 
+          kubectl rollout restart deployment apigateway-deployment -n lgcns
