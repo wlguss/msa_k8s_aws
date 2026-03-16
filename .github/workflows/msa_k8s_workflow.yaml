@@ -30,3 +30,18 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
           aws-region: ap-south-1
+
+      # eks 클러스터와 연결 
+      - name: aws eks cluster update
+        run: aws eks update-kubeconfig --region ap-south-1 --name lgcns-wlguss-cluster
+
+      - name: aws ecr login
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # image 빌드를 위한 인프라 구축(ingress, kafka, redis, zookeeper, rabbitMQ)
+      - name: deploy infra
+        run: |
+          kubectl apply -f ./k8s/msa-ingress.yaml
+          kubectl apply -f ./k8s/msa-redis.yaml
+          kubectl apply -f ./k8s/msa-zookeeper.yaml
+          kubectl apply -f ./k8s/msa-kafka.yaml
