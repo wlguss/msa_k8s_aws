@@ -60,3 +60,18 @@ jobs:
         run : |
           kubectl apply -f ./apigateway/k8s/apigateway-depl.yaml 
           kubectl rollout restart deployment apigateway-deployment -n lgcns
+
+      # user-service
+      - name: user-service image build and push docker image to ecr
+        env: 
+          REGISTRY: 933090817123.dkr.ecr.ap-south-1.amazonaws.com
+          REPOSITORY: user-service
+          IMAGE_TAG: lagest
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f ./user/Dockerfile ./user
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+      - name: eks kubectl user-service apply
+        run : |
+          kubectl apply -f ./user/k8s/user-depl.yaml 
+          kubectl rollout restart deployment user-deployment -n lgcns
