@@ -103,5 +103,5 @@ jobs:
 
       - name: eks kubectl order-service apply
         run : |
-          kubectl apply -f ./order/k8s/product-depl.yaml 
+          kubectl apply -f ./order/k8s/order-depl.yaml 
           kubectl rollout restart deployment order-deployment -n lgcns
