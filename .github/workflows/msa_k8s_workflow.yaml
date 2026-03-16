@@ -1,107 +1,107 @@
-name: msa eks cicd
+# name: msa eks cicd
 
-# main 브렌치의 코드 변경이 감지되면 아래 pipeline 동작 (trigger)
-on:
-  push:
-    branches:
-      - main
+# # main 브렌치의 코드 변경이 감지되면 아래 pipeline 동작 (trigger)
+# on:
+#   push:
+#     branches:
+#       - main
 
-jobs:
-  # job name
-  build-and-deploy:
-    # runner (OS 설치 작업)
-    runs-on: ubuntu-latest
+# jobs:
+#   # job name
+#   build-and-deploy:
+#     # runner (OS 설치 작업)
+#     runs-on: ubuntu-latest
 
-    steps:
-      # 소스코드 checkout
-      - name: checkout github
-        uses: actions/checkout@v2 
+#     steps:
+#       # 소스코드 checkout
+#       - name: checkout github
+#         uses: actions/checkout@v2 
 
-      # 리눅스 환경에서 kubectl client 설치
-      - name: install kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: "v1.34.1"
+#       # 리눅스 환경에서 kubectl client 설치
+#       - name: install kubectl
+#         uses: azure/setup-kubectl@v3
+#         with:
+#           version: "v1.34.1"
 
-      # aws 인증 
-      - name: aws configure
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
-          aws-region: ap-south-1
+#       # aws 인증 
+#       - name: aws configure
+#         uses: aws-actions/configure-aws-credentials@v1
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_KEY }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+#           aws-region: ap-south-1
 
-      # eks 클러스터와 연결 
-      - name: aws eks cluster update
-        run: aws eks update-kubeconfig --region ap-south-1 --name lgcns-wlguss-cluster
+#       # eks 클러스터와 연결 
+#       - name: aws eks cluster update
+#         run: aws eks update-kubeconfig --region ap-south-1 --name lgcns-wlguss-cluster
 
-      - name: aws ecr login
-        uses: aws-actions/amazon-ecr-login@v1
+#       - name: aws ecr login
+#         uses: aws-actions/amazon-ecr-login@v1
 
-      # image 빌드를 위한 인프라 구축(ingress, kafka, redis, zookeeper, rabbitMQ)
-      - name: deploy infra
-        run: |  # 멀티라인의 리눅스 명령어 사용 
-          kubectl apply -f ./k8s/msa_ingress.yaml
-          kubectl apply -f ./k8s/msa_redis.yaml
-          kubectl apply -f ./k8s/msa_zookeeper.yaml
-          kubectl apply -f ./k8s/msa_kafka.yaml
+#       # image 빌드를 위한 인프라 구축(ingress, kafka, redis, zookeeper, rabbitMQ)
+#       - name: deploy infra
+#         run: |  # 멀티라인의 리눅스 명령어 사용 
+#           kubectl apply -f ./k8s/msa_ingress.yaml
+#           kubectl apply -f ./k8s/msa_redis.yaml
+#           kubectl apply -f ./k8s/msa_zookeeper.yaml
+#           kubectl apply -f ./k8s/msa_kafka.yaml
 
-      # image build 후 ecr에 push (image: apigateway, user, product, order)
-      - name: apigateway image build and push docker image to ecr
-        env: 
-          REGISTRY: 933090817123.dkr.ecr.ap-south-1.amazonaws.com
-          REPOSITORY: apigateway
-          IMAGE_TAG: lagest
-        run: |
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f ./apigateway/Dockerfile ./apigateway
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+#       # image build 후 ecr에 push (image: apigateway, user, product, order)
+#       - name: apigateway image build and push docker image to ecr
+#         env: 
+#           REGISTRY: 933090817123.dkr.ecr.ap-south-1.amazonaws.com
+#           REPOSITORY: apigateway
+#           IMAGE_TAG: lagest
+#         run: |
+#           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f ./apigateway/Dockerfile ./apigateway
+#           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      - name: eks kubectl apigateway apply
-        run : |
-          kubectl apply -f ./apigateway/k8s/apigateway-depl.yaml 
-          kubectl rollout restart deployment apigateway-deployment -n lgcns
+#       - name: eks kubectl apigateway apply
+#         run : |
+#           kubectl apply -f ./apigateway/k8s/apigateway-depl.yaml 
+#           kubectl rollout restart deployment apigateway-deployment -n lgcns
 
-      # user-service
-      - name: user-service image build and push docker image to ecr
-        env: 
-          REGISTRY: 933090817123.dkr.ecr.ap-south-1.amazonaws.com
-          REPOSITORY: user-service
-          IMAGE_TAG: lagest
-        run: |
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f ./user/Dockerfile ./user
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+#       # user-service
+#       - name: user-service image build and push docker image to ecr
+#         env: 
+#           REGISTRY: 933090817123.dkr.ecr.ap-south-1.amazonaws.com
+#           REPOSITORY: user-service
+#           IMAGE_TAG: lagest
+#         run: |
+#           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f ./user/Dockerfile ./user
+#           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      - name: eks kubectl user-service apply
-        run : |
-          kubectl apply -f ./user/k8s/user-depl.yaml 
-          kubectl rollout restart deployment user-deployment -n lgcns
+#       - name: eks kubectl user-service apply
+#         run : |
+#           kubectl apply -f ./user/k8s/user-depl.yaml 
+#           kubectl rollout restart deployment user-deployment -n lgcns
 
-      # product-service 
-      - name: product-service image build and push docker image to ecr
-        env: 
-          REGISTRY: 933090817123.dkr.ecr.ap-south-1.amazonaws.com
-          REPOSITORY: product-service
-          IMAGE_TAG: lagest
-        run: |
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f ./product/Dockerfile ./product
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+#       # product-service 
+#       - name: product-service image build and push docker image to ecr
+#         env: 
+#           REGISTRY: 933090817123.dkr.ecr.ap-south-1.amazonaws.com
+#           REPOSITORY: product-service
+#           IMAGE_TAG: lagest
+#         run: |
+#           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f ./product/Dockerfile ./product
+#           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      - name: eks kubectl product-service apply
-        run : |
-          kubectl apply -f ./product/k8s/product-depl.yaml 
-          kubectl rollout restart deployment product-deployment -n lgcns
+#       - name: eks kubectl product-service apply
+#         run : |
+#           kubectl apply -f ./product/k8s/product-depl.yaml 
+#           kubectl rollout restart deployment product-deployment -n lgcns
 
-      # order-service
-      - name: order-service image build and push docker image to ecr
-        env: 
-          REGISTRY: 933090817123.dkr.ecr.ap-south-1.amazonaws.com
-          REPOSITORY: order-service
-          IMAGE_TAG: lagest
-        run: |
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f ./order/Dockerfile ./product
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+#       # order-service
+#       - name: order-service image build and push docker image to ecr
+#         env: 
+#           REGISTRY: 933090817123.dkr.ecr.ap-south-1.amazonaws.com
+#           REPOSITORY: order-service
+#           IMAGE_TAG: lagest
+#         run: |
+#           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f ./order/Dockerfile ./product
+#           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      - name: eks kubectl order-service apply
-        run : |
-          kubectl apply -f ./order/k8s/order-depl.yaml 
-          kubectl rollout restart deployment order-deployment -n lgcns
+#       - name: eks kubectl order-service apply
+#         run : |
+#           kubectl apply -f ./order/k8s/order-depl.yaml 
+#           kubectl rollout restart deployment order-deployment -n lgcns
