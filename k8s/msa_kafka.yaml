@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: kakfa-deployment
+  namespace: lgcns
+
+spec:
+  replicas: 1
+  selector:   
+    matchLabels:
+      app: kakfa
+
+  template:
+    metadata:
+      labels:
+        app: kakfa
+    spec:
+      containers:
+        - name: kakfa-container
+          image: wurstmeister/kakfa     
+          ports:
+            - containerPort: 9092
+            - containerPort: 9093
+          env:
+            - name: KAFKA_ADVERTISED_LISTENERS 
+            - value: INSIDE://kafka-service:9093, OUTSIDE://kafka-service:9092
+
+            # 각 서비스의 통신 방식을 지정 (암호화 여부)
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+            - value: INSIDE:PLAINTEXT, OUTSIDE:PLAINTEXT
+            # kafka가 실제 통신에서 듣고 있는 주소 정보
+            - name: KAFKA_LISTENERS 
+            - value: INSIDE://0.0.0.0:9093, OUTSIDE://0.0.0.0:9092
+
+            # zookeeper 클러스터와 연결
+            - name: KAFKA_ZOOKEEPER_CONNECT 
+            - value: zookeeper-service:2181
+
+            # kafka server -broker - client 사용할 리스너 정보 
+            # 내부통신(inside)
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+            - value: INSIDE
+
+
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: kafka-service
+  namespace: lgcns
+
+spec:
+  type: ClusterIP
+  selector:
+    app: kafka
+  
+  # port forwarding
+  ports:
+    - name: outside # 외부 접속용 포트
+      port: 9092
+      targetPort: 9092
+
+    - name: inside  # 브로커 내부에서 통신용으로 사용하는 포트 
+      port: 9093
+      targetPort: 9093

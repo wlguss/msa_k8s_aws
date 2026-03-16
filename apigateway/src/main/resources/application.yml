@@ -33,7 +33,7 @@ spring:
                 # browser : http://server.xxxxx.shop/user-service/users/signIn
                 # inner   : http://server.xxxxx.shop/users/signIn
                 - StripPrefix=1 
-              uri: lb://user-service
+              uri: http://user-service
 
             - id: product-service
               predicates: 
@@ -43,7 +43,7 @@ spring:
                 # browser : http://server.xxxxx.shop/product-service/product/create
                 # inner   : http://server.xxxxx.shop/product/signIn
                 - StripPrefix=1 
-              uri: lb://product-service
+              uri: http://product-service
 
             - id: order-service
               predicates: 
@@ -53,8 +53,9 @@ spring:
                 # browser : http://server.xxxxx.shop/product-service/product/create
                 # inner   : http://server.xxxxx.shop/product/signIn
                 - StripPrefix=1 
-              uri: lb://order-service
+              uri: http://order-service
                 
 jwt:
-  secret: jslim-super-secret-key-for-jwt-123456789
+  secret: wlguss-jihyun-springsecurity-key-test-forjwtprovider-134679
+
 

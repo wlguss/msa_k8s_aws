@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 
 metadata:
-  name: user-deployment
+  name: product-deployment
   namespace: lgcns
 
 spec:
@@ -11,20 +11,20 @@ spec:
   replicas: 1
   selector:   
     matchLabels:
-      app: user  # 서비스가 라우팅할 때 찾는 이름 
+      app: product  # 서비스가 라우팅할 때 찾는 이름 
 
   template:
     metadata:
       labels:
-        app: user   # 스펙의 이름 
+        app: product   # 스펙의 이름 
     spec:
       containers:
-        - name: user-container
+        - name: product-container
           # ecr 경로
-          image: 933090817123.dkr.ecr.ap-south-1.amazonaws.com/user-service
+          image: 9933090817123.dkr.ecr.ap-south-1.amazonaws.com/product-service
           ports:
             - containerPort: 8080
-          resources:
+          resources:  # auto-scaling
             # 컨테이너가 사용할 수 있는 최대치의 리소스
             limits:
               cpu: "1"
@@ -54,19 +54,18 @@ spec:
                   name: lgcns-app-secrets
                   key: DB_PASSWORD
 
-
 ---
 apiVersion: v1
 kind: Service
 
 metadata:
-  name: user-service
+  name: product-service
   namespace: lgcns
 
 spec:
   type: ClusterIP
   selector:
-    app: user
+    app: product
   # port forwarding 
   ports:
     - port: 80

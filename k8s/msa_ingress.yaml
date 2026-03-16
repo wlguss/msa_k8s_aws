@@ -1,0 +1,27 @@
+# aws nlb -> ingress controller(pod) -> ingress -> service -> pod
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress 
+metadata:
+  name: order-ingress
+  namespace: lgcns
+  annotations:
+
+spec:
+  ingressClassName: nginx
+  rules:
+    # 레코드로 등록한 도메인 이름 
+    - host: server.inspireseop2283.shop
+      http:
+        paths:
+          # http://server.inspireseop2283.shop/ 
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                # routing 위해서 apigateway를 찾고 해당 서비스에서 실제 라우팅 발생 
+                name: apigateway-service
+                port:
+                  number: 80
+
+        

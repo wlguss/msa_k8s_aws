@@ -12,13 +12,14 @@ spring:
   # mariadb settings
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/inspire  
-    username: root
-    password: 123456789
+    url: jdbc:mariadb://${DB_HOST}:3306/inspire?useSSL=TRUE&requireSSL=true # k8s - secret에 담을 수 있음 
+    username: ${DB_ADMIN}
+    password: ${DB_PASSWORD}
 
   data:
     redis:
-      host: localhost
+      # pod 실행 중인 redis service 이름으로 변경 
+      host: redis-service 
       port: 6379
       password: 
       timeout: 6000ms
@@ -33,4 +34,4 @@ spring:
     show-sql: true  
 
 jwt:
-  secret: jslim-super-secret-key-for-jwt-123456789
+  secret: wlguss-jihyun-springsecurity-key-test-forjwtprovider-134679

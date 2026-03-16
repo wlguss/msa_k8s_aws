@@ -11,7 +11,7 @@ import com.example.order.domain.dto.ProductResponseDTO;
 k8s service 
 @FeignClient(name = "product-service", url="http://product-service")
 */
-@FeignClient(name = "product-service")
+@FeignClient(name = "product-service", url="http://product-service")
 public interface ProductOpenFeignService {
    
     @GetMapping("/product/{productId}") 
