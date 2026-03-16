@@ -41,7 +41,7 @@ jobs:
       # image 빌드를 위한 인프라 구축(ingress, kafka, redis, zookeeper, rabbitMQ)
       - name: deploy infra
         run: |  # 멀티라인의 리눅스 명령어 사용 
-          kubectl apply -f ./k8s/msa-ingress.yaml
-          kubectl apply -f ./k8s/msa-redis.yaml
-          kubectl apply -f ./k8s/msa-zookeeper.yaml
-          kubectl apply -f ./k8s/msa-kafka.yaml
+          kubectl apply -f ./k8s/msa_ingress.yaml
+          kubectl apply -f ./k8s/msa_redis.yaml
+          kubectl apply -f ./k8s/msa_zookeeper.yaml
+          kubectl apply -f ./k8s/msa_kafka.yaml
