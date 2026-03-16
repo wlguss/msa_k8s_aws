@@ -45,3 +45,13 @@ jobs:
           kubectl apply -f ./k8s/msa_redis.yaml
           kubectl apply -f ./k8s/msa_zookeeper.yaml
           kubectl apply -f ./k8s/msa_kafka.yaml
+
+      # image build 후 ecr에 push 
+      - name: image build and push docker image to ecr    # ecr registry에 이미지가 생성됨 
+        env: 
+          REGISTRY: 933090817123.dkr.ecr.ap-south-1.amazonaws.com
+          REPOSITORY: order-wlguss-backend
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f Dockerfile . 
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
